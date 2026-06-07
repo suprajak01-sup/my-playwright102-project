@@ -45,14 +45,15 @@ post:
   - echo "Test execution completed on ${matrix.os}"
   - echo "Cleaning up temporary files..."
 
-# Command to discover the test files. 
-# This searches for any file containing 'test' within the tests folder.
+# Command to discover test files in a cross-platform compatible way.
+# This finds all files ending in '.spec.ts' inside the 'tests' directory.
 testDiscovery:
   type: raw
   mode: dynamic
-  command: grep -lr 'test' tests
+  command: find tests -name "*.spec.ts"
 
-# Command to execute tests based on the files discovered above
+# Command to execute tests based on the files discovered above.
+# The $test variable will now correctly receive the file path on both OS.
 testRunnerCommand: npx playwright test $test --project=chromium
 
 
