@@ -20,8 +20,8 @@ env:
   PROJECT_NAME: "Playwright-TestMu-Demo"
 
 secrets:
-  MY_SECRET_TOKEN:
-  API_PASSWORD:
+  - MY_SECRET_TOKEN
+  - API_PASSWORD
 
 pre:
   - npm ci
