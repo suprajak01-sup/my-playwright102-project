@@ -45,12 +45,12 @@ post:
   - echo "Test execution completed on ${matrix.os}"
   - echo "Cleaning up temporary files..."
 
-# Use Playwright's own discovery and pipe it to grep for clean, universal output.
 # This finds all spec files and filters the output for lines containing ".spec.ts".
+# Bypasses Windows/Linux shell differences by using Node.js to find the test files
 testDiscovery:
   type: raw
   mode: dynamic
-  command: npx playwright test --list | grep ".spec.ts"
+  command: node -e "require('fs').readdirSync('tests').filter(f=>f.endsWith('.spec.ts')).forEach(f=>console.log('tests/'+f))"
 
 # The runner command remains the same.
 testRunnerCommand: npx playwright test $test --project=chromium
