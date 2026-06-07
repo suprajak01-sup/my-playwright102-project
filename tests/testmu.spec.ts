@@ -9,7 +9,7 @@ test('Simple Form Demo validation', async ({ page }) => {
   // 2. Click “Simple Form Demo”
   await page.getByText("Simple Form Demo").click();
   await expect(page).toHaveURL(/.*simple-form-demo/);
-  await page.waitForLoadState('networkidle'); 
+  await page.waitForLoadState('domcontentloaded'); 
 
   const message = "Welcome to TestMu AI";
 
@@ -39,12 +39,12 @@ test('Simple Form Demo validation', async ({ page }) => {
 
  test('Drag and Drop Slider validation with fine-tuning', async ({ page }) => {
   // 1. Open the Selenium Playground
-  await page.goto('https://www.lambdatest.com/selenium-playground/', { waitUntil: 'networkidle' });
+  await page.goto('https://www.lambdatest.com/selenium-playground/', { waitUntil: 'domcontentloaded' });
 
   // 2. Click “Drag & Drop Sliders”
   await page.getByText('Drag & Drop Sliders').click();
   await expect(page).toHaveURL(/.*drag-drop-range-sliders-demo/);
-  await page.waitForLoadState('networkidle'); 
+  await page.waitForLoadState('domcontentloaded'); 
 
   // 3. Locate the slider and the output field
   const sliderContainer = page.locator('.sp__range-success');
@@ -87,7 +87,7 @@ test('Simple Form Demo validation', async ({ page }) => {
 
 test('Input Form Submit validation', async ({ page }) => {
   // 1. Open the Selenium Playground
-  await page.goto('https://www.lambdatest.com/selenium-playground/', { waitUntil: 'networkidle' });
+  await page.goto('https://www.lambdatest.com/selenium-playground/', { waitUntil: 'domcontentloaded' });
 
   // 2. Click “Input Form Submit”
   await page.getByText('Input Form Submit').click();
