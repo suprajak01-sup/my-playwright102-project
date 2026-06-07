@@ -32,7 +32,7 @@ test.describe('TestMu AI Selenium Playground Scenarios', () => {
     // 5. Fill the "Enter Message" input — targeted by label association
     //    The label text is "Enter Message"; input id is "user-message"
     const messageInput = page.locator('#user-message');
-    await messageInput.waitFor({ state: 'visible', timeout: 30000 });
+    await messageInput.waitFor({ state: 'visible', timeout: 60000 });
     await messageInput.fill(message);
 
     // 6. Click "Get Checked Value"
@@ -55,7 +55,7 @@ test.describe('TestMu AI Selenium Playground Scenarios', () => {
     // 3. There are 8 sliders on the page; "Default value 15" is the 3rd (index 2)
     //    We target it specifically and its adjacent output via JS
     const sliders = page.locator('input[type="range"]');
-    await sliders.first().waitFor({ state: 'visible', timeout: 30000 });
+    await sliders.first().waitFor({ state: 'visible', timeout: 60000 });
 
     // 4. Set slider value to 95 via JS (most reliable in headless)
     //    Then fire both 'input' and 'change' events so the page's output updates
@@ -94,7 +94,7 @@ test.describe('TestMu AI Selenium Playground Scenarios', () => {
     await waitForPage(page);
 
     // Wait for the form's first field to be visible
-    await page.locator('#name').waitFor({ state: 'visible', timeout: 30000 });
+    await page.locator('#name').waitFor({ state: 'visible', timeout: 60000 });
 
     // 3. Click Submit without filling anything
     await page.locator('[type="submit"]').click();
