@@ -45,16 +45,16 @@ post:
   - echo "Test execution completed on ${matrix.os}"
   - echo "Cleaning up temporary files..."
 
-# Command to discover test files in a cross-platform compatible way.
-# This finds all files ending in '.spec.ts' inside the 'tests' directory.
+# Use Playwright's own discovery and pipe it to grep for clean, universal output.
+# This finds all spec files and filters the output for lines containing ".spec.ts".
 testDiscovery:
   type: raw
   mode: dynamic
-  command: find tests -name "*.spec.ts"
+  command: npx playwright test --list | grep ".spec.ts"
 
-# Command to execute tests based on the files discovered above.
-# The $test variable will now correctly receive the file path on both OS.
+# The runner command remains the same.
 testRunnerCommand: npx playwright test $test --project=chromium
+
 
 
 # Artifacts Management
