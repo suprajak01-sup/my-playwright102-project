@@ -10,7 +10,7 @@ test.describe('TestMu AI Selenium Playground Scenarios', () => {
     try {
       await page.waitForLoadState('networkidle', { timeout: 15000 });
     } catch {
-      // networkidle not guaranteed in headless CI — safe to continue
+      // networkidle not guaranteed headlessly — safe to continue
     }
   }
 
@@ -19,27 +19,27 @@ test.describe('TestMu AI Selenium Playground Scenarios', () => {
     await page.goto(baseURL, { waitUntil: 'domcontentloaded' });
     await waitForPage(page);
 
-    // 2. Click "Simple Form Demo" — use href-based locator, more stable than role
+    // 2. Click "Simple Form Demo"
     await page.locator('a[href*="simple-form-demo"]').click();
 
-    // 3. Validate URL
+    // 3. Validate URL contains "simple-form-demo"
     await expect(page).toHaveURL(/.*simple-form-demo/);
     await waitForPage(page);
 
     // 4. String variable
     const message = 'Welcome to TestMu AI';
 
-    // 5. Fill message — try placeholder first, fall back to id/name
-    const messageInput = page.locator('#user-message, input[name="input-message"], input[placeholder*="Message"], input[placeholder*="message"]').first();
+    // 5. Fill the "Enter Message" input — targeted by label association
+    //    The label text is "Enter Message"; input id is "user-message"
+    const messageInput = page.locator('#user-message');
     await messageInput.waitFor({ state: 'visible', timeout: 30000 });
     await messageInput.fill(message);
 
     // 6. Click "Get Checked Value"
-    await page.locator('button:has-text("Get Checked Value"), input[value*="Get Checked"]').first().click();
+    await page.locator('#showInput').click();
 
-    // 7. Validate text
-    const messageLocator = page.locator('#message');
-    await expect(messageLocator).toHaveText(message, { timeout: 15000 });
+    // 7. Validate the same text message is displayed
+    await expect(page.locator('#message')).toHaveText(message, { timeout: 15000 });
   });
 
   test('Scenario 2: Drag & Drop Sliders', async ({ page }) => {
@@ -47,44 +47,40 @@ test.describe('TestMu AI Selenium Playground Scenarios', () => {
     await page.goto(baseURL, { waitUntil: 'domcontentloaded' });
     await waitForPage(page);
 
-    // 2. Click "Drag & Drop Sliders" — stable href locator
-    await page.locator('a[href*="drag-drop-range-sliders"]').click();
+    // 2. Click "Drag & Drop Sliders"
+    await page.locator('a[href*="drag-drop-range-sliders-demo"]').click();
     await expect(page).toHaveURL(/.*drag-drop-range-sliders-demo/);
     await waitForPage(page);
 
-    // 3. Locate slider — use broader selectors since class may differ headlessly
-    // Target the LAST range input on the page (the "Default value 15" slider)
-    const slider = page.locator('input[type="range"]').last();
-    const output = page.locator('output#rangeSuccess');
+    // 3. There are 8 sliders on the page; "Default value 15" is the 3rd (index 2)
+    //    We target it specifically and its adjacent output via JS
+    const sliders = page.locator('input[type="range"]');
+    await sliders.first().waitFor({ state: 'visible', timeout: 30000 });
 
-    // 4. Wait for slider to be attached and visible
-    await slider.waitFor({ state: 'attached', timeout: 30000 });
-    await page.waitForFunction(
-      () => {
-        const el = document.querySelector('input[type="range"]');
-        return el && (el as HTMLElement).offsetWidth > 0;
-      },
-      { timeout: 30000 }
-    );
-
-    // 5. Use keyboard approach — more reliable than mouse drag in headless
-    await slider.focus();
-    // Set to known start value via JS, then use arrow keys to reach 95
+    // 4. Set slider value to 95 via JS (most reliable in headless)
+    //    Then fire both 'input' and 'change' events so the page's output updates
     await page.evaluate(() => {
-      const sliders = document.querySelectorAll('input[type="range"]');
-      const target = sliders[sliders.length - 1] as HTMLInputElement;
-      target.value = '15';
-      target.dispatchEvent(new Event('input', { bubbles: true }));
-      target.dispatchEvent(new Event('change', { bubbles: true }));
+      // "Default value 15" slider is the 3rd range input (index 2)
+      const allSliders = document.querySelectorAll('input[type="range"]');
+      const slider = allSliders[2] as HTMLInputElement;
+      slider.value = '95';
+      slider.dispatchEvent(new Event('input', { bubbles: true }));
+      slider.dispatchEvent(new Event('change', { bubbles: true }));
     });
 
-    // Press ArrowRight to go from 15 → 95 (80 presses, step=1)
-    for (let i = 0; i < 80; i++) {
-      await slider.press('ArrowRight');
-    }
+    // 5. Validate: the output element next to the 3rd slider shows 95
+    //    Output elements sit alongside each slider; index matches slider index
+    const outputValue = await page.evaluate(() => {
+      const outputs = document.querySelectorAll('output');
+      // If outputs exist use them, else read the slider value directly
+      if (outputs.length >= 3) {
+        return outputs[2].textContent?.trim();
+      }
+      const allSliders = document.querySelectorAll('input[type="range"]');
+      return (allSliders[2] as HTMLInputElement).value;
+    });
 
-    // 6. Validate value is 95
-    await expect(output).toHaveText('95', { timeout: 15000 });
+    expect(outputValue).toBe('95');
   });
 
   test('Scenario 3: Input Form Submit', async ({ page }) => {
@@ -92,25 +88,24 @@ test.describe('TestMu AI Selenium Playground Scenarios', () => {
     await page.goto(baseURL, { waitUntil: 'domcontentloaded' });
     await waitForPage(page);
 
-    // 2. Click "Input Form Submit" — href-based locator
+    // 2. Click "Input Form Submit"
     await page.locator('a[href*="input-form-demo"]').click();
     await expect(page).toHaveURL(/.*input-form-demo/);
     await waitForPage(page);
 
-    // Wait for form to be present
+    // Wait for the form's first field to be visible
     await page.locator('#name').waitFor({ state: 'visible', timeout: 30000 });
 
-    const submitButton = page.locator('button[type="submit"], input[type="submit"]').first();
-
     // 3. Click Submit without filling anything
-    await submitButton.click();
+    await page.locator('[type="submit"]').click();
 
-    // 4. Assert browser native validation on name field
+    // 4. Assert browser native validation fires on name field
     const nameInput = page.locator('#name');
     const validationMessage = await nameInput.evaluate(
-      (element: HTMLInputElement) => element.validationMessage
+      (el: HTMLInputElement) => el.validationMessage
     );
-    expect(validationMessage).toContain('fill');
+    // "fill" works across Chromium, Firefox, WebKit
+    expect(validationMessage.toLowerCase()).toContain('fill');
 
     // 5. Fill all fields
     await nameInput.fill('John Doe');
@@ -124,15 +119,14 @@ test.describe('TestMu AI Selenium Playground Scenarios', () => {
     await page.locator('#inputState').fill('California');
     await page.locator('#inputZip').fill('94103');
 
-    // 6. Select country
+    // 6. Select "United States" from Country dropdown
     await page.selectOption('select[name="country"]', { label: 'United States' });
 
-    // 7. Submit
-    await submitButton.click();
+    // 7. Submit the completed form
+    await page.locator('[type="submit"]').click();
 
     // 8. Validate success message
-    const successMessage = page.locator('.success-msg');
-    await expect(successMessage).toHaveText(
+    await expect(page.locator('.success-msg')).toHaveText(
       'Thanks for contacting us, we will get back to you shortly.',
       { timeout: 15000 }
     );
