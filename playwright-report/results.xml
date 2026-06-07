@@ -1,0 +1,10 @@
+<testsuites id="" name="" tests="3" failures="0" skipped="0" errors="0" time="16.491445">
+<testsuite name="testmu.spec.ts" timestamp="2026-06-07T10:47:08.274Z" hostname="chromium" tests="3" failures="0" skipped="0" time="36.672" errors="0">
+<testcase name="TestMu AI Selenium Playground Scenarios › Scenario 1: Simple Form Demo" classname="testmu.spec.ts" time="9.674">
+</testcase>
+<testcase name="TestMu AI Selenium Playground Scenarios › Scenario 2: Drag &amp; Drop Sliders" classname="testmu.spec.ts" time="13.273">
+</testcase>
+<testcase name="TestMu AI Selenium Playground Scenarios › Scenario 3: Input Form Submit" classname="testmu.spec.ts" time="13.725">
+</testcase>
+</testsuite>
+</testsuites>

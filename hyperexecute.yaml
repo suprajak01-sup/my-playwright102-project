@@ -1,0 +1,63 @@
+---
+version: 0.1
+globalTimeout: 90
+testSuiteTimeout: 90
+testSuiteStep: 90
+
+# Matrix configuration to run parallel tests across 2 different Browser/OS combinations
+runson: ${matrix.os}
+autosplit: true
+retryOnFailure: true
+maxRetries: 1
+
+# Controls parallel execution and VM allocation
+concurrency: 2
+parallelism: 2
+
+matrix:
+  os: [win, linux] # Windows 10 (win) and Linux
+
+# Injecting Environment Variables
+env:
+  NODE_ENV: testing
+  PROJECT_NAME: "Playwright-TestMu-Demo"
+
+# Secret Management: Showcase injecting a hidden API key or Password
+# The actual value is stored in the HyperExecute Dashboard Secrets manager
+secrets:
+  MY_SECRET_TOKEN:
+  API_PASSWORD:
+
+# Pre Steps and Dependency Caching
+# These steps run before the tests start
+pre:
+  - npm install
+  - npx playwright install chromium --with-deps
+
+# Dependency Caching: Ensure node_modules are cached across runs
+cacheKey: '{{ checksum "package-lock.json" }}'
+cacheDirectories:
+  - node_modules
+
+# Post Steps
+# These run after the tests have finished (useful for cleanups)
+post:
+  - echo "Test execution completed on ${matrix.os}"
+  - echo "Cleaning up temporary files..."
+
+# Command to execute tests (autosplit will handle dividing scenarios)
+testDiscovery:
+  type: raw
+  mode: dynamic
+  command: npx playwright test --list --reporter=line
+
+testRunnerCommand: npx playwright test $test --project=chromium
+
+# Artifacts Management
+# Gathers Playwright reports/videos and collates them into a single downloadable zip on the dashboard
+mergeArtifacts: true
+uploadArtefacts:
+  - name: Playwright-Test-Reports
+    path:
+      - playwright-report/**
+      - test-results/**

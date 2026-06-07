@@ -1,0 +1,39 @@
+{"level":"error","time":"2026-06-07T16:22:42.274+0530","caller":"globalconfigvalidator/setup.go:54","msg":"2026-06-07T16:22:42+05:30    error    \u001b[91mERR::NO::USER\u001b[0m     Unable to find LT username.    Unable to parse LT username. Use --user cli flag or LT_USERNAME environment variable"}
+{"level":"error","time":"2026-06-07T16:22:42.276+0530","caller":"cmd/bin.go:127","msg":"2026-06-07T16:22:42+05:30    error    \u001b[91mERR::NO::USER\u001b[0m     Unable to find LT username."}
+{"level":"debug","time":"2026-06-07T16:24:23.164+0530","caller":"cmd/bin.go:145","msg":"cli os: windows, cli arch: amd64"}
+{"level":"debug","time":"2026-06-07T16:24:23.826+0530","caller":"cmd/bin.go:154","msg":"Upstream version details: {Name:cli Min:0.2.265 Max:0.2.342} "}
+{"level":"info","time":"2026-06-07T16:24:23.827+0530","caller":"cmd/bin.go:202","msg":"Generating TraceID for tracking request: 01KTGVGAKC26SMEZCCPH4AM1EA \n"}
+{"level":"debug","time":"2026-06-07T16:24:27.580+0530","caller":"core/lifecycle.go:123","msg":"Setting environment"}
+{"level":"debug","time":"2026-06-07T16:24:27.582+0530","caller":"core/lifecycle.go:126","msg":"Parsing config"}
+{"level":"debug","time":"2026-06-07T16:24:27.582+0530","caller":"yamlconfigmanager/setup.go:725","msg":"Custom location for .hyperexecute.yaml specified. Using: hyperexecute.yaml"}
+{"level":"debug","time":"2026-06-07T16:24:27.582+0530","caller":"yamlconfigmanager/setup.go:117","msg":"using hyperexecute config from : hyperexecute.yaml"}
+{"level":"debug","time":"2026-06-07T16:24:27.619+0530","caller":"yamlconfigmanager/setup.go:1916","msg":"Environment variable not set against the variable - matrix.os mentioned in yaml"}
+{"level":"debug","time":"2026-06-07T16:24:27.619+0530","caller":"yamlconfigmanager/setup.go:1916","msg":"Environment variable not set against the variable - matrix.os mentioned in yaml"}
+{"level":"debug","time":"2026-06-07T16:24:29.427+0530","caller":"yamlconfigmanager/setup.go:2153","msg":"Autodetecting test type in files of path : C:\\Users\\kansupraja\\my-playwright102-project"}
+{"level":"debug","time":"2026-06-07T16:24:29.473+0530","caller":"yamlconfigmanager/setup.go:2195","msg":"File in which test type is detected - C:\\Users\\kansupraja\\my-playwright102-project/package.json"}
+{"level":"debug","time":"2026-06-07T16:24:29.473+0530","caller":"yamlconfigmanager/setup.go:2196","msg":"Pre command in which test type is detected - npx playwright install chromium --with-deps"}
+{"level":"debug","time":"2026-06-07T16:24:29.474+0530","caller":"yamlconfigmanager/setup.go:515","msg":"Automatic test type detected - playwright"}
+{"level":"error","time":"2026-06-07T16:24:30.145+0530","caller":"core/lifecycle.go:131","msg":"2026-06-07T16:24:21+05:30    error    \u001b[91mERR::YML::VAL\u001b[0m     Invalid yaml content: Cannot infer individual parallelism,either provide global parallelism or at least one of win_parallelism, linux_parallelism,  mac_parallelism!!"}
+{"level":"debug","time":"2026-06-07T16:24:30.145+0530","caller":"core/lifecycle.go:75","msg":"Quit requested from main goroutine...."}
+{"level":"debug","time":"2026-06-07T16:24:30.145+0530","caller":"core/lifecycle.go:76","msg":"Waiting for the goroutines to exit"}
+{"level":"debug","time":"2026-06-07T16:24:30.145+0530","caller":"core/lifecycle.go:79","msg":"All lifecycle goroutines exited"}
+{"level":"debug","time":"2026-06-07T16:24:30.145+0530","caller":"cmd/bin.go:361","msg":"main: all goroutines have finished."}
+{"level":"debug","time":"2026-06-07T16:24:30.145+0530","caller":"cmd/bin.go:400","msg":"Exiting application due to error \u001b[91mERR::YML::VAL\u001b[0m     Invalid yaml content: Cannot infer individual parallelism,either provide global parallelism or at least one of win_parallelism, linux_parallelism,  mac_parallelism!!"}
+{"level":"debug","time":"2026-06-07T16:26:34.709+0530","caller":"cmd/bin.go:145","msg":"cli os: windows, cli arch: amd64"}
+{"level":"debug","time":"2026-06-07T16:26:35.334+0530","caller":"cmd/bin.go:154","msg":"Upstream version details: {Name:cli Min:0.2.265 Max:0.2.342} "}
+{"level":"info","time":"2026-06-07T16:26:35.335+0530","caller":"cmd/bin.go:202","msg":"Generating TraceID for tracking request: 01KTGVMBNW8CT17P0NRKA8BNAG \n"}
+{"level":"debug","time":"2026-06-07T16:26:38.823+0530","caller":"core/lifecycle.go:123","msg":"Setting environment"}
+{"level":"debug","time":"2026-06-07T16:26:38.829+0530","caller":"core/lifecycle.go:126","msg":"Parsing config"}
+{"level":"debug","time":"2026-06-07T16:26:38.829+0530","caller":"yamlconfigmanager/setup.go:725","msg":"Custom location for .hyperexecute.yaml specified. Using: hyperexecute.yaml"}
+{"level":"debug","time":"2026-06-07T16:26:38.829+0530","caller":"yamlconfigmanager/setup.go:117","msg":"using hyperexecute config from : hyperexecute.yaml"}
+{"level":"debug","time":"2026-06-07T16:26:38.869+0530","caller":"yamlconfigmanager/setup.go:1916","msg":"Environment variable not set against the variable - matrix.os mentioned in yaml"}
+{"level":"debug","time":"2026-06-07T16:26:38.869+0530","caller":"yamlconfigmanager/setup.go:1916","msg":"Environment variable not set against the variable - matrix.os mentioned in yaml"}
+{"level":"debug","time":"2026-06-07T16:26:40.609+0530","caller":"yamlconfigmanager/setup.go:2153","msg":"Autodetecting test type in files of path : C:\\Users\\kansupraja\\my-playwright102-project"}
+{"level":"debug","time":"2026-06-07T16:26:40.612+0530","caller":"yamlconfigmanager/setup.go:2195","msg":"File in which test type is detected - C:\\Users\\kansupraja\\my-playwright102-project/package.json"}
+{"level":"debug","time":"2026-06-07T16:26:40.612+0530","caller":"yamlconfigmanager/setup.go:2196","msg":"Pre command in which test type is detected - npx playwright install chromium --with-deps"}
+{"level":"debug","time":"2026-06-07T16:26:40.612+0530","caller":"yamlconfigmanager/setup.go:515","msg":"Automatic test type detected - playwright"}
+{"level":"info","time":"2026-06-07T16:26:41.273+0530","caller":"core/lifecycle.go:136","msg":"HyperExecute Config validated successfully"}
+{"level":"debug","time":"2026-06-07T16:26:41.275+0530","caller":"core/lifecycle.go:75","msg":"Quit requested from main goroutine...."}
+{"level":"debug","time":"2026-06-07T16:26:41.275+0530","caller":"core/lifecycle.go:76","msg":"Waiting for the goroutines to exit"}
+{"level":"debug","time":"2026-06-07T16:26:41.275+0530","caller":"core/lifecycle.go:79","msg":"All lifecycle goroutines exited"}
+{"level":"debug","time":"2026-06-07T16:26:41.275+0530","caller":"cmd/bin.go:361","msg":"main: all goroutines have finished."}
