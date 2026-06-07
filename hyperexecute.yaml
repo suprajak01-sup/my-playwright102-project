@@ -4,61 +4,40 @@ globalTimeout: 90
 testSuiteTimeout: 90
 testSuiteStep: 90
 
-# Matrix configuration to run parallel tests across 2 different Browser/OS combinations
 runson: ${matrix.os}
 autosplit: true
 retryOnFailure: true
 maxRetries: 1
 
-# Controls parallel execution and VM allocation
 concurrency: 2
 parallelism: 2
 
 matrix:
-  os: [win, linux] # Windows 10 (win) and Linux
+  os: [win, linux]
 
-# Injecting Environment Variables
 env:
   NODE_ENV: testing
   PROJECT_NAME: "Playwright-TestMu-Demo"
 
-# Secret Management: Showcase injecting a hidden API key or Password
-# The actual value is stored in the HyperExecute Dashboard Secrets manager
 secrets:
   MY_SECRET_TOKEN:
   API_PASSWORD:
 
-# Pre Steps and Dependency Caching
-# These steps run before the tests start
 pre:
-  - npm install
+  - npm ci
   - npx playwright install chromium --with-deps
 
-# Dependency Caching: Ensure node_modules are cached across runs
 cacheKey: '{{ checksum "package-lock.json" }}'
 cacheDirectories:
   - node_modules
 
-# Post Steps
-# These run after the tests have finished (useful for cleanups)
 post:
-  - echo "Test execution completed on ${matrix.os}"
-  - echo "Cleaning up temporary files..."
+  - node -e "console.log('Test execution completed on: ' + process.platform)"
+  - node -e "console.log('Cleaning up temporary files...')"
 
-# This finds all spec files and filters the output for lines containing ".spec.ts".
-# Bypasses Windows/Linux shell differences by using Node.js to find the test files
-testDiscovery:
-  type: raw
-  mode: dynamic
-  command: node -e "require('fs').readdirSync('tests').filter(f=>f.endsWith('.spec.ts')).forEach(f=>console.log('tests/'+f))"
+test:
+  - npx playwright test --project=chromium
 
-# The runner command remains the same.
-testRunnerCommand: npx playwright test $test --project=chromium
-
-
-
-# Artifacts Management
-# Gathers Playwright reports/videos and collates them into a single downloadable zip on the dashboard
 mergeArtifacts: true
 uploadArtefacts:
   - name: Playwright-Test-Reports
