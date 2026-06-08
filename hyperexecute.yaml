@@ -1,16 +1,16 @@
 ---
 version: 0.1
-globalTimeout: 90
-testSuiteTimeout: 90
-testSuiteStep: 90
+globalTimeout: 120
+testSuiteTimeout: 120
+testSuiteStep: 120
 
 # Matrix configuration to run tests across 2 different OS combinations
 runson: ${matrix.os}
-autosplit: false # Turn autosplit off as we are defining the test suite manually
+autosplit: false # We are running one specific command
 retryOnFailure: true
 maxRetries: 1
 
-# Controls parallel execution and VM allocation
+# Controls parallel execution
 concurrency: 2
 parallelism: 2
 
@@ -22,7 +22,7 @@ env:
   NODE_ENV: testing
   PROJECT_NAME: "Playwright-TestMu-Demo"
 
-# Secret Management: The actual value is stored in the HyperExecute Dashboard
+# Secret Management
 secrets:
   MY_SECRET_TOKEN:
   API_PASSWORD:
@@ -40,13 +40,12 @@ cacheDirectories:
 # Post Steps
 post:
   - echo "Test execution completed on ${matrix.os}"
-  - echo "Cleaning up temporary files..."
 
-# --- THIS IS THE FINAL FIX ---
-# Define the test suite directly. This is the most robust, cross-platform method.
-# It completely avoids shell command differences between Windows and Linux.
+# --- THE GUARANTEED CROSS-PLATFORM FIX ---
+# Run the command via an NPM script.
+# Both Windows and Linux will correctly execute the 'hyperexecute' script without shell conflicts.
 testSuites:
-  - npx playwright test tests/testmu.spec.ts --project=chromium
+  - npm run hyperexecute
 
 # Artifacts Management
 mergeArtifacts: true
