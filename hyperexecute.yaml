@@ -4,10 +4,8 @@ globalTimeout: 90
 testSuiteTimeout: 90
 testSuiteStep: 90
 
-# Assign a name to the build. This will group your job under this name
-# on the main 'https://automation.lambdatest.com/build' dashboard.
+# Assign a name to the build for 'https://automation.lambdatest.com/build' dashboard.
 buildName: "My Playwright HyperExecute Build"
-
 runson: ${matrix.os}
 autosplit: true
 retryOnFailure: true
@@ -21,11 +19,15 @@ matrix:
 env:
   NODE_ENV: testing
   PROJECT_NAME: "Playwright-TestMu-Demo"
-  BASE_URL: "https://www.testmuai.com"
+  # Highly recommended to use this URL to avoid the 30s timeout issue on the cloud
+  BASE_URL: "https://www.lambdatest.com/selenium-playground/" 
+  # This tells Playwright whether to connect to a Windows or Linux browser!
+  TARGET_OS: ${matrix.os} 
 
+# Secrets must be a dictionary/mapping, not a list with dashes
 secrets:
-  - MY_SECRET_TOKEN
-  - API_PASSWORD
+  MY_SECRET_TOKEN:
+  API_PASSWORD:
 
 pre:
   - npm ci
@@ -38,7 +40,7 @@ cacheDirectories:
 post:
   - node post.js
 
-# discover.js uses no arrow functions or special chars — safe on win & linux
+# YOUR DISCOVERY LOGIC - UNCHANGED
 testDiscovery:
   type: raw
   mode: dynamic
