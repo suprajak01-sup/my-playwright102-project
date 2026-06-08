@@ -4,7 +4,7 @@ globalTimeout: 90
 testSuiteTimeout: 90
 testSuiteStep: 90
 
-# Assign a name to the build for 'https://automation.lambdatest.com/build' dashboard.
+# This groups the job on the Web Automation Dashboard
 buildName: "My Playwright HyperExecute Build"
 runson: ${matrix.os}
 autosplit: true
@@ -19,12 +19,13 @@ matrix:
 env:
   NODE_ENV: testing
   PROJECT_NAME: "Playwright-TestMu-Demo"
-  # Highly recommended to use this URL to avoid the 30s timeout issue on the cloud
-  BASE_URL: "https://www.lambdatest.com/selenium-playground/" 
-  # This tells Playwright whether to connect to a Windows or Linux browser!
-  TARGET_OS: ${matrix.os} 
+  BASE_URL: "https://www.lambdatest.com/selenium-playground/"
+  
+  # --- THE MAGIC FIX ---
+  # This environment variable tells the HyperExecute Agent to automatically 
+  # bridge Playwright's CDP session to the Web Automation Dashboard!
+  LT_ENABLE_PLAYWRIGHT_TELEMETRY: "true"
 
-# Secrets must be a dictionary/mapping, not a list with dashes
 secrets:
   MY_SECRET_TOKEN:
   API_PASSWORD:
@@ -40,13 +41,17 @@ cacheDirectories:
 post:
   - node post.js
 
-# YOUR DISCOVERY LOGIC - UNCHANGED
 testDiscovery:
   type: raw
   mode: dynamic
   command: node discover.js
 
 testRunnerCommand: npx playwright test $test --project=chromium
+
+reports:
+  - type: junit
+    path:
+      - playwright-report/results.xml
 
 mergeArtifacts: true
 uploadArtefacts:
@@ -60,4 +65,3 @@ uploadArtefacts:
 jobLabel:
   - playwright-102
   - typescript
-  - testmu-ai
