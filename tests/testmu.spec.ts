@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
  
-test.describe('Test Scenario 1: Simple Form Demo', () => {
-  test('should validate message input and display', async ({ page }) => {
+test.describe('TestMu AI Selenium Playground Scenarios', () => {
+  test('Test Scenario 1: should validate message input and display', async ({ page }) => {
     // Maximize the browser window
     await page.setViewportSize({ width: 1920, height: 1080 });
  
@@ -28,7 +28,7 @@ test.describe('Test Scenario 1: Simple Form Demo', () => {
     expect(displayedMessage).toBe(messageText);
   });
  
-  test('should drag slider to value 95', async ({ page }) => {
+  test('Test Scenario 2:should drag slider to value 95', async ({ page }) => {
     // Maximize the browser window
     await page.setViewportSize({ width: 1920, height: 1080 });
  
@@ -65,7 +65,7 @@ test.describe('Test Scenario 1: Simple Form Demo', () => {
     // Validate whether the range value shows 95
     await expect(rangeOutput).toHaveText('95');
   });
-  test('should validate form submission with required fields', async ({ page }) => {
+  test('Test Scenario 3:should validate form submission with required fields', async ({ page }) => {
     // Maximize the browser window
     await page.setViewportSize({ width: 1920, height: 1080 });
     // 1. Open the Selenium Playground page and click "Input Form Submit"

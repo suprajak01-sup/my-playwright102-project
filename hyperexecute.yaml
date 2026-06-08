@@ -8,7 +8,8 @@ runson: ${matrix.os}
 autosplit: true
 retryOnFailure: true
 maxRetries: 1
-concurrency: 1
+concurrency: 3
+parallelism: 3
 
 matrix:
   os: [win, linux]
