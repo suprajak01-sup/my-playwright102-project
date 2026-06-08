@@ -33,7 +33,7 @@ test.describe('Test Scenario 1: Simple Form Demo', () => {
     await page.setViewportSize({ width: 1920, height: 1080 });
  
     // 1. Open the Selenium Playground page and click "Drag & Drop Sliders"
-    await page.goto('https://www.testmuai.com/selenium-playground/');
+    await page.goto('https://www.testmuai.com/selenium-playground/',{ waitUntil: 'domcontentloaded' });
  
     // 2. Click “Drag & Drop Sliders”
   await page.getByText('Drag & Drop Sliders').click();
