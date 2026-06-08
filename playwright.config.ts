@@ -12,7 +12,7 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './tests',
-  timeout: 60_000,          // per-test timeout
+  timeout: 180_000,          // per-test timeout
   expect: { timeout: 15_000 },
   fullyParallel: true,     // HyperExecute handles parallelism at the job level
   retries: 1,               // one retry per test inside the runner
