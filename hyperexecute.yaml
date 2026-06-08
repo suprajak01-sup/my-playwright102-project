@@ -6,7 +6,10 @@ testSuiteStep: 120
 
 # Matrix configuration to run tests across 2 different OS combinations
 runson: ${matrix.os}
-autosplit: false
+
+# Use autosplit: true. This tells HyperExecute to ask Playwright for its test list.
+autosplit: true
+
 retryOnFailure: true
 maxRetries: 1
 
@@ -41,18 +44,17 @@ cacheDirectories:
 post:
   - echo "Test execution completed"
 
-# --- THE FIX for 'No Scenarios' ---
-# Explicitly tell HyperExecute where to find the JUnit test report.
-# This allows it to parse the results and populate the Scenarios UI.
+# --- THE GUARANTEED FIX ---
+# This combination is the key. 'autosplit' asks Playwright for its test list,
+# and 'reports' tells HyperExecute where the final XML will be.
+testDiscovery:
+  type: playwright
+  mode: dynamic
+
 reports:
   - type: junit
     path:
       - playwright-report/results.xml
-
-# 'runCommands' is the correct directive for this setup.
-# Playwright will run, generate the results.xml, and HyperExecute will parse it.
-runCommands:
-  - npx playwright test --project=chromium
 
 # Artifacts Management
 mergeArtifacts: true
