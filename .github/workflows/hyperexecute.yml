@@ -1,30 +1,60 @@
-name: HyperExecute Playwright Tests
+name: HyperExecute – Playwright 102
 
+# ── Triggers ──────────────────────────────────────────────────────────────────
 on:
   push:
-    branches:
-      - main
+    branches: [main, master]
   pull_request:
-    branches:
-      - main
+    branches: [main, master]
+  workflow_dispatch:          # allow manual runs from the Actions tab
 
+# ── Jobs ──────────────────────────────────────────────────────────────────────
 jobs:
-  HyperExecute-Tests:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+  hyperexecute:
+    name: Run on HyperExecute (win + linux)
+    runs-on: ubuntu-latest    # the GitHub Actions runner only downloads + fires the CLI;
+                              # actual test execution happens on HyperExecute VMs
 
+    steps:
+      # 1. Check out the repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Set up Node.js (needed to validate package.json exists locally)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # 3. Download the HyperExecute CLI for Linux
       - name: Setup HyperExecute CLI
         run: |
-          wget https://downloads.lambdatest.com/hyperexecute/linux/hyperexecute
+          curl -O https://downloads.lambdatest.com/hyperexecute/linux/hyperexecute
           chmod +x hyperexecute
-          sudo mv hyperexecute /usr/local/bin/
 
+      # 4. Trigger HyperExecute
+      #    LT_USERNAME and LT_ACCESS_KEY must be added as GitHub repository secrets:
+      #    Settings → Secrets and variables → Actions → New repository secret
       - name: Trigger HyperExecute
         env:
-          # Setup these credentials in your GitHub Repository Secrets
-          LT_USERNAME: ${{ secrets.LT_USERNAME }}
+          LT_USERNAME:   ${{ secrets.LT_USERNAME }}
           LT_ACCESS_KEY: ${{ secrets.LT_ACCESS_KEY }}
         run: |
-          hyperexecute --user $LT_USERNAME --key $LT_ACCESS_KEY --config hyperexecute.yaml
+          ./hyperexecute \
+            --user "$LT_USERNAME" \
+            --key  "$LT_ACCESS_KEY" \
+            --config hyperexecute.yaml \
+            --download-artifacts \
+            --force-clean-artifacts
+
+      # 5. Upload the downloaded artifacts as a GitHub Actions artifact
+      #    (provides a second copy alongside the HyperExecute dashboard zip)
+      - name: Upload test artifacts to GitHub
+        if: always()           # run even if tests failed
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14
