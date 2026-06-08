@@ -14,9 +14,9 @@ export default defineConfig({
   testDir: './tests',
   timeout: 60_000,          // per-test timeout
   expect: { timeout: 15_000 },
-  fullyParallel: false,     // HyperExecute handles parallelism at the job level
+  fullyParallel: true,     // HyperExecute handles parallelism at the job level
   retries: 1,               // one retry per test inside the runner
-  workers: 1,               // single worker per HyperExecute task
+  workers: 3,               // single worker per HyperExecute task
   reporter: [
     ['list'],
     ['html', { outputFolder: 'playwright-report', open: 'never' }],

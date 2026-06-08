@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { test, expect, Page } from '@playwright/test';
 
 const PROJECT_NAME = process.env.PROJECT_NAME ?? 'Playwright-TestMu-Demo';
