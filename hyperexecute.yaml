@@ -6,11 +6,11 @@ testSuiteStep: 120
 
 # Matrix configuration to run tests across 2 different OS combinations
 runson: ${matrix.os}
-autosplit: false # We are running one specific command
+autosplit: false
 retryOnFailure: true
 maxRetries: 1
 
-# Controls parallel execution
+# Controls VM allocation
 concurrency: 2
 parallelism: 2
 
@@ -20,7 +20,7 @@ matrix:
 # Injecting Environment Variables
 env:
   NODE_ENV: testing
-  PROJECT_NAME: "Playwright-TestMu-Demo"
+  PROJECT_NAME: "my-playwright102-project"
 
 # Secret Management
 secrets:
@@ -39,13 +39,14 @@ cacheDirectories:
 
 # Post Steps
 post:
-  - echo "Test execution completed on ${matrix.os}"
+  - echo "Test execution completed"
 
-# --- THE GUARANTEED CROSS-PLATFORM FIX ---
-# Run the command via an NPM script.
-# Both Windows and Linux will correctly execute the 'hyperexecute' script without shell conflicts.
-testSuites:
-  - npm run hyperexecute
+# --- THE DEFINITIVE FIX ---
+# 'runCommands' is the native HyperExecute directive for non-autosplit execution.
+# Playwright will naturally read playwright.config.ts, find the 'tests' folder, 
+# and execute everything perfectly on both OS environments.
+runCommands:
+  - npx playwright test --project=chromium
 
 # Artifacts Management
 mergeArtifacts: true

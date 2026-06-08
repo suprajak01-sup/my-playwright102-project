@@ -1,10 +1,10 @@
 {
-  "name": "playwright-hyperexecute-demo",
+  "name": "my-playwright102-project",
   "version": "1.0.0",
   "description": "Selenium Playground Tests using Playwright and HyperExecute",
   "scripts": {
     "test": "playwright test",
-    "hyperexecute": "playwright test testmu.spec.ts --project=chromium"
+    "hyperexecute": "playwright test --project=chromium"
   },
   "devDependencies": {
     "@playwright/test": "^1.42.0",
