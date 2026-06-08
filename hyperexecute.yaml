@@ -1,16 +1,9 @@
 ---
-# ── HyperExecute YAML ─────────────────────────────────────────────────────────
-# Project : my-playwright102-project
-# Framework: Playwright + TypeScript
-# Strategy : Matrix (win + linux) with autosplit
-# Dashboard: https://hyperexecute.lambdatest.com/hyperexecute
-# ─────────────────────────────────────────────────────────────────────────────
 version: 0.1
 globalTimeout: 90
 testSuiteTimeout: 90
 testSuiteStep: 90
 
-# ── Parallel Execution ────────────────────────────────────────────────────────
 runson: ${matrix.os}
 autosplit: true
 retryOnFailure: true
@@ -21,18 +14,15 @@ parallelism: 2
 matrix:
   os: [win, linux]
 
-# ── Injecting Environment Variables ──────────────────────────────────────────
 env:
   NODE_ENV: testing
   PROJECT_NAME: "Playwright-TestMu-Demo"
   BASE_URL: "https://www.testmuai.com"
 
-# ── Secret Management ─────────────────────────────────────────────────────────
 secrets:
   - MY_SECRET_TOKEN
   - API_PASSWORD
 
-# ── Pre Steps + Dependency Caching ───────────────────────────────────────────
 pre:
   - npm ci
   - npx playwright install chromium --with-deps
@@ -41,22 +31,18 @@ cacheKey: '{{ checksum "package-lock.json" }}'
 cacheDirectories:
   - node_modules
 
-# ── Post Steps ────────────────────────────────────────────────────────────────
 post:
-  - node -e "console.log('Tests finished on:', process.platform, '| Project:', process.env.PROJECT_NAME)"
+  - node -e "console.log('Tests finished on platform:', process.platform)"
   - node -e "console.log('Artifacts collected from playwright-report/ and test-results/')"
 
-# ── Test Discovery & Runner ───────────────────────────────────────────────────
-# Use Node.js for discovery — grep/sed do not exist on Windows.
-# This lists all .spec.ts files under tests/ cross-platform.
+# discover.js uses no arrow functions or special chars — safe on win & linux
 testDiscovery:
   type: raw
   mode: dynamic
-  command: node -e "const fs=require('fs');const files=fs.readdirSync('tests').filter(f=>f.endsWith('.spec.ts')).map(f=>'tests/'+f);console.log(files.join('\n'));"
+  command: node discover.js
 
 testRunnerCommand: npx playwright test $test --project=chromium
 
-# ── Artifacts Management ──────────────────────────────────────────────────────
 mergeArtifacts: true
 uploadArtefacts:
   - name: Playwright-Reports
