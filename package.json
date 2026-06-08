@@ -1,14 +1,14 @@
 {
   "name": "my-playwright102-project",
   "version": "1.0.0",
-  "description": "Selenium Playground Tests using Playwright and HyperExecute",
+  "description": "Playwright 102 Assignment – TestMu AI Selenium Playground on HyperExecute",
   "scripts": {
-    "test": "playwright test",
-    "hyperexecute": "playwright test --project=chromium"
+    "test": "npx playwright test",
+    "test:report": "npx playwright show-report"
   },
   "devDependencies": {
-    "@playwright/test": "^1.42.0",
+    "@playwright/test": "^1.44.0",
     "@types/node": "^20.0.0",
-    "dotenv": "^16.4.5"
+    "typescript": "^5.0.0"
   }
 }

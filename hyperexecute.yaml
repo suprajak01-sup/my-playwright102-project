@@ -1,64 +1,87 @@
 ---
-version: 0.1
-globalTimeout: 120
-testSuiteTimeout: 120
-testSuiteStep: 120
+# ── HyperExecute YAML ─────────────────────────────────────────────────────────
+# Project : my-playwright102-project
+# Framework: Playwright + TypeScript
+# Strategy : Matrix (win + linux) with autosplit
+# Dashboard: https://hyperexecute.lambdatest.com/hyperexecute
+# ─────────────────────────────────────────────────────────────────────────────
 
-# Matrix configuration to run tests across 2 different OS combinations
+version: 0.1
+globalTimeout: 90
+testSuiteTimeout: 90
+testSuiteStep: 90
+
+# ── Parallel Execution ────────────────────────────────────────────────────────
+# Matrix runs the full test suite on BOTH OS combinations simultaneously.
+# Each combination gets its own VM; concurrency = 2 tasks per VM.
 runson: ${matrix.os}
-autosplit: false # We are running one specific command.
+autosplit: true
 retryOnFailure: true
 maxRetries: 1
-
-# Controls VM allocation
 concurrency: 2
 parallelism: 2
 
 matrix:
-  os: [win, linux] # Windows 10 (win) and Linux
+  os: [win, linux]       # Windows 10 (latest Chrome) and Linux
 
-# --- THIS IS THE FIX ---
-# Environment variables set in this 'env' block are correctly
-# applied on BOTH Windows and Linux by HyperExecute.
+# ── Injecting Environment Variables ──────────────────────────────────────────
+# These are available in playwright.config.ts and tests via process.env.*
 env:
   NODE_ENV: testing
-  PROJECT_NAME: "my-playwright102-project"
-  PLAYWRIGHT_JUNIT_OUTPUT_NAME: "playwright-report/results.xml"
+  PROJECT_NAME: "Playwright-TestMu-Demo"
+  BASE_URL: "https://www.testmuai.com"
 
-# Secret Management
+# ── Secret Management ─────────────────────────────────────────────────────────
+# Values are stored in the HyperExecute Dashboard → Secrets Manager.
+# They are injected as environment variables at runtime and never logged.
+# In tests: process.env.MY_SECRET_TOKEN  /  process.env.API_PASSWORD
 secrets:
-  MY_SECRET_TOKEN:
-  API_PASSWORD:
+  - MY_SECRET_TOKEN
+  - API_PASSWORD
 
-# Pre Steps and Dependency Caching
+# ── Pre Steps + Dependency Caching ───────────────────────────────────────────
+# These commands run BEFORE any test execution on each VM.
+# `npm ci` is preferred over `npm install` in CI — respects package-lock.json
+# exactly and never modifies it.
 pre:
-  - npm install
+  - npm ci
   - npx playwright install chromium --with-deps
 
-# Dependency Caching
+# Caching: node_modules is cached using the package-lock.json checksum.
+# On subsequent runs with no lockfile changes, npm ci is near-instant.
 cacheKey: '{{ checksum "package-lock.json" }}'
 cacheDirectories:
   - node_modules
 
-# Post Steps
+# ── Post Steps ────────────────────────────────────────────────────────────────
+# Optional commands that run AFTER test execution on each VM.
 post:
-  - echo "Test execution completed"
+  - node -e "console.log('✅ Tests finished on:', process.platform, '| Project:', process.env.PROJECT_NAME)"
+  - node -e "console.log('📁 Artifacts collected from playwright-report/ and test-results/')"
 
-# Tell HyperExecute where to find the generated test report to populate the UI.
-reports:
-  - type: junit
-    path:
-      - playwright-report/results.xml
+# ── Test Runner ───────────────────────────────────────────────────────────────
+# HyperExecute discovers and distributes test files; each task runs one file.
+testDiscovery:
+  type: raw
+  mode: dynamic
+  command: grep -rn "test(" tests/ | grep -v "test.describe" | sed 's/:.*$//' | sort -u
 
-# This command runs after the environment variable has been set.
-# We also force the reporter here to be absolutely sure.
-testSuites:
-  - npx playwright test --project=chromium --reporter=junit,html
+testRunnerCommand: npx playwright test $test --project=chromium
 
-# Artifacts Management
+# ── Artifacts Management ──────────────────────────────────────────────────────
+# mergeArtifacts: true collates artifacts from ALL parallel VMs into a single
+# downloadable zip on the HyperExecute dashboard.
 mergeArtifacts: true
 uploadArtefacts:
-  - name: Playwright-Test-Reports
+  - name: Playwright-Reports
     path:
       - playwright-report/**
+  - name: Playwright-Test-Results
+    path:
       - test-results/**
+
+# ── Job Label ─────────────────────────────────────────────────────────────────
+jobLabel:
+  - playwright-102
+  - typescript
+  - testmu-ai

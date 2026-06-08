@@ -1,62 +1,47 @@
-import { defineConfig, devices } from "@playwright/test";
-import * as dotenv from "dotenv";
+import { defineConfig, devices } from '@playwright/test';
 
-dotenv.config();
-
+/**
+ * Playwright configuration for HyperExecute.
+ *
+ * • Runs on chromium only (HyperExecute matrix handles OS splitting).
+ * • Videos, screenshots and traces are always captured so HyperExecute
+ *   Artifacts Management can collate them into a single downloadable zip.
+ * • Timeouts are generous to survive headless CI network latency.
+ * • NODE_ENV and PROJECT_NAME are injected via HyperExecute env: block
+ *   and are readable here via process.env.
+ */
 export default defineConfig({
-  // The directory where your test files are located.
   testDir: './tests',
-
-  // Run all tests in parallel.
-  fullyParallel: true,
-
-  // Fail the build on CI if you accidentally left test.only in the source code.
-  forbidOnly: !!process.env.CI,
-
-  // Give failing tests 2 retries on CI, but 0 retries locally for faster feedback.
-  retries: process.env.CI ? 2 : 0,
-
-  // Use a limited number of workers on CI.
-  workers: process.env.CI ? '100%' : undefined,
-  
-  // Set a global timeout for each test case (45 seconds).
-  timeout: 45 * 1000, 
-  expect: {
-    // Set a timeout for assertions (10 seconds).
-    timeout: 10000, 
-  },
-
-  // *** CRITICAL FIX FOR "NO SCENARIOS" ***
-  // Define all reporters here. This guarantees the JUnit file is always created.
+  timeout: 60_000,          // per-test timeout
+  expect: { timeout: 15_000 },
+  fullyParallel: false,     // HyperExecute handles parallelism at the job level
+  retries: 1,               // one retry per test inside the runner
+  workers: 1,               // single worker per HyperExecute task
   reporter: [
-    ['list'], // Prints a simple list of tests to the console log.
-    ['junit', { outputFile: 'playwright-report/results.xml' }], // For HyperExecute UI.
-    ['html', { open: 'never' }] // For the downloadable artifact zip.
+    ['list'],
+    ['html', { outputFolder: 'playwright-report', open: 'never' }],
+    ['junit', { outputFile: 'playwright-report/results.xml' }],
   ],
 
   use: {
-    // The correct, live URL for the playground.
-    baseURL: 'https://www.lambdatest.com/selenium-playground/',
-
-    // Always run headless on CI/CD environments.
-    headless: true, 
-
-    // Standard CI settings for collecting artifacts on failure.
-    trace: 'on-first-retry',
-    screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
+    headless: true,
+    viewport: { width: 1280, height: 720 },
+    // Capture everything — required for Artifacts Management
+    screenshot: 'on',
+    video: 'on',
+    trace: 'on',
+    // Base URL can be overridden by env var if needed
+    baseURL: process.env.BASE_URL ?? 'https://www.testmuai.com',
+    // Secret token available in test via process.env.MY_SECRET_TOKEN
+    // (injected by HyperExecute Secrets Management)
   },
 
   projects: [
     {
       name: 'chromium',
-      use: { 
-        ...devices['Desktop Chrome'],
-        viewport: { width: 1280, height: 720 },
-      },
+      use: { ...devices['Desktop Chrome'] },
     },
   ],
 
-  // The output directory for traces, videos, and screenshots.
-  outputDir: 'test-results/',
+  outputDir: 'test-results',
 });
