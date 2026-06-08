@@ -41,10 +41,16 @@ cacheDirectories:
 post:
   - echo "Test execution completed"
 
-# --- THE DEFINITIVE FIX ---
-# 'runCommands' is the native HyperExecute directive for non-autosplit execution.
-# Playwright will naturally read playwright.config.ts, find the 'tests' folder, 
-# and execute everything perfectly on both OS environments.
+# --- THE FIX for 'No Scenarios' ---
+# Explicitly tell HyperExecute where to find the JUnit test report.
+# This allows it to parse the results and populate the Scenarios UI.
+reports:
+  - type: junit
+    path:
+      - playwright-report/results.xml
+
+# 'runCommands' is the correct directive for this setup.
+# Playwright will run, generate the results.xml, and HyperExecute will parse it.
 runCommands:
   - npx playwright test --project=chromium
 
