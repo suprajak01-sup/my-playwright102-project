@@ -35,9 +35,11 @@ test.describe('Test Scenario 1: Simple Form Demo', () => {
     // 1. Open the Selenium Playground page and click "Drag & Drop Sliders"
     await page.goto('https://www.testmuai.com/selenium-playground/');
  
-    // Click on "Drag & Drop Sliders" - using role locator
-    await page.getByRole('link', { name: 'Drag & Drop Sliders' }).click();
- 
+    // 2. Click “Drag & Drop Sliders”
+  await page.getByText('Drag & Drop Sliders').click();
+  await expect(page).toHaveURL(/.*drag-drop-range-sliders-demo/);
+  await page.waitForLoadState('networkidle'); 
+
     // 2. Select the slider "Default value 15" and drag the bar to make it 95
     // Using XPath locator for the slider with default value 15
     const sliderHandle = page.locator('(//input[@type="range"])[3]');
@@ -69,9 +71,10 @@ test.describe('Test Scenario 1: Simple Form Demo', () => {
     // 1. Open the Selenium Playground page and click "Input Form Submit"
      await page.goto('https://www.testmuai.com/selenium-playground/');
  
-    // Click "Input Form Submit" - using text locator
-    await page.getByRole('link', { name: 'Input Form Submit', exact: true }).click();
- 
+    await page.getByText('Input Form Submit').click();
+  await expect(page).toHaveURL(/.*input-form-demo/);
+  await page.waitForLoadState('networkidle'); 
+
     // 2. Click "Submit" without filling in any information in the form
     await page.getByRole('button', { name: 'Submit', exact: true }).click();
  
