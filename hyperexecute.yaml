@@ -6,7 +6,7 @@ testSuiteStep: 120
 
 # Matrix configuration to run tests across 2 different OS combinations
 runson: ${matrix.os}
-autosplit: false
+autosplit: false # We are running one specific command.
 retryOnFailure: true
 maxRetries: 1
 
@@ -17,10 +17,13 @@ parallelism: 2
 matrix:
   os: [win, linux] # Windows 10 (win) and Linux
 
-# Injecting Environment Variables
+# --- THIS IS THE FIX ---
+# Environment variables set in this 'env' block are correctly
+# applied on BOTH Windows and Linux by HyperExecute.
 env:
   NODE_ENV: testing
   PROJECT_NAME: "my-playwright102-project"
+  PLAYWRIGHT_JUNIT_OUTPUT_NAME: "playwright-report/results.xml"
 
 # Secret Management
 secrets:
@@ -41,18 +44,16 @@ cacheDirectories:
 post:
   - echo "Test execution completed"
 
-# --- THE FIX ---
-# Instead of Discovery, we directly define the Test Suite.
-# This runs the tests directly without trying to split them, avoiding all shell parsing errors.
-# By setting PLAYWRIGHT_JUNIT_OUTPUT_NAME we force Playwright to generate the report.
-testSuites:
-  - PLAYWRIGHT_JUNIT_OUTPUT_NAME=playwright-report/results.xml npx playwright test --project=chromium --reporter=junit,html
-
-# Tell HyperExecute where to find the generated test report to populate the 'Scenarios' UI
+# Tell HyperExecute where to find the generated test report to populate the UI.
 reports:
   - type: junit
     path:
       - playwright-report/results.xml
+
+# This command runs after the environment variable has been set.
+# We also force the reporter here to be absolutely sure.
+testSuites:
+  - npx playwright test --project=chromium --reporter=junit,html
 
 # Artifacts Management
 mergeArtifacts: true
