@@ -6,16 +6,16 @@ test.describe('Test Scenario 1: Simple Form Demo', () => {
     await page.setViewportSize({ width: 1920, height: 1080 });
  
     // 1. Open LambdaTest's Selenium Playground
-    await page.goto('https://www.lambdatest.com/selenium-playground');
+    await page.goto('https://www.testmuai.com/selenium-playground/');
  
-    // 2. Click "Simple Form Demo" - using text locator
-    await page.getByRole('link', { name: 'Simple Form Demo' }).click();
- 
-    // 3. Validate that the URL contains "simple-form-demo"
-    await expect(page).toHaveURL(/simple-form-demo/);
+   // 2. Click “Simple Form Demo”
+  await page.getByText("Simple Form Demo").click();
+  await expect(page).toHaveURL(/.*simple-form-demo/);
+  await page.waitForLoadState('networkidle'); 
+
  
     // 4. Create a variable for a string value
-    const messageText = 'Welcome to LambdaTest';
+    const messageText = "Welcome to TestMu AI";
  
     // 5. Use this variable to enter values in the "Enter Message" text box - using ID locator
     await page.getByRole('textbox', { name: 'Please enter your Message', exact: true }).fill(messageText);
@@ -33,7 +33,7 @@ test.describe('Test Scenario 1: Simple Form Demo', () => {
     await page.setViewportSize({ width: 1920, height: 1080 });
  
     // 1. Open the Selenium Playground page and click "Drag & Drop Sliders"
-    await page.goto('https://www.lambdatest.com/selenium-playground');
+    await page.goto('https://www.testmuai.com/selenium-playground/');
  
     // Click on "Drag & Drop Sliders" - using role locator
     await page.getByRole('link', { name: 'Drag & Drop Sliders' }).click();
@@ -67,7 +67,7 @@ test.describe('Test Scenario 1: Simple Form Demo', () => {
     // Maximize the browser window
     await page.setViewportSize({ width: 1920, height: 1080 });
     // 1. Open the Selenium Playground page and click "Input Form Submit"
-    await page.goto('https://www.lambdatest.com/selenium-playground');
+     await page.goto('https://www.testmuai.com/selenium-playground/');
  
     // Click "Input Form Submit" - using text locator
     await page.getByRole('link', { name: 'Input Form Submit', exact: true }).click();
