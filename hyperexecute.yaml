@@ -12,8 +12,6 @@ testSuiteTimeout: 90
 testSuiteStep: 90
 
 # ── Parallel Execution ────────────────────────────────────────────────────────
-# Matrix runs the full test suite on BOTH OS combinations simultaneously.
-# Each combination gets its own VM; concurrency = 2 tasks per VM.
 runson: ${matrix.os}
 autosplit: true
 retryOnFailure: true
@@ -22,55 +20,44 @@ concurrency: 2
 parallelism: 2
 
 matrix:
-  os: [win, linux]       # Windows 10 (latest Chrome) and Linux
+  os: [win, linux]
 
 # ── Injecting Environment Variables ──────────────────────────────────────────
-# These are available in playwright.config.ts and tests via process.env.*
 env:
   NODE_ENV: testing
   PROJECT_NAME: "Playwright-TestMu-Demo"
   BASE_URL: "https://www.testmuai.com"
 
 # ── Secret Management ─────────────────────────────────────────────────────────
-# Values are stored in the HyperExecute Dashboard → Secrets Manager.
-# They are injected as environment variables at runtime and never logged.
-# In tests: process.env.MY_SECRET_TOKEN  /  process.env.API_PASSWORD
 secrets:
   - MY_SECRET_TOKEN
   - API_PASSWORD
 
 # ── Pre Steps + Dependency Caching ───────────────────────────────────────────
-# These commands run BEFORE any test execution on each VM.
-# `npm ci` is preferred over `npm install` in CI — respects package-lock.json
-# exactly and never modifies it.
 pre:
   - npm ci
   - npx playwright install chromium --with-deps
 
-# Caching: node_modules is cached using the package-lock.json checksum.
-# On subsequent runs with no lockfile changes, npm ci is near-instant.
 cacheKey: '{{ checksum "package-lock.json" }}'
 cacheDirectories:
   - node_modules
 
 # ── Post Steps ────────────────────────────────────────────────────────────────
-# Optional commands that run AFTER test execution on each VM.
 post:
-  - node -e "console.log('✅ Tests finished on:', process.platform, '| Project:', process.env.PROJECT_NAME)"
-  - node -e "console.log('📁 Artifacts collected from playwright-report/ and test-results/')"
+  - node -e "console.log('Tests finished on:', process.platform, '| Project:', process.env.PROJECT_NAME)"
+  - node -e "console.log('Artifacts collected from playwright-report/ and test-results/')"
 
-# ── Test Runner ───────────────────────────────────────────────────────────────
-# HyperExecute discovers and distributes test files; each task runs one file.
+# ── Test Discovery & Runner ───────────────────────────────────────────────────
+# Use Node.js for discovery — grep/sed do not exist on Windows.
+# This lists all .spec.ts files under tests/ cross-platform.
 testDiscovery:
   type: raw
   mode: dynamic
-  command: grep -rn "test(" tests/ | grep -v "test.describe" | sed 's/:.*$//' | sort -u
+  command: node -e "const fs=require('fs');const files=fs.readdirSync('tests').filter(f=>f.endsWith('.spec.ts')).map(f=>'tests/'+f);console.log(files.join('\n'));"
 
 testRunnerCommand: npx playwright test $test --project=chromium
 
 # ── Artifacts Management ──────────────────────────────────────────────────────
-# mergeArtifacts: true collates artifacts from ALL parallel VMs into a single
-# downloadable zip on the HyperExecute dashboard.
 mergeArtifacts: true
 uploadArtefacts:
   - name: Playwright-Reports
@@ -80,7 +67,6 @@ uploadArtefacts:
     path:
       - test-results/**
 
-# ── Job Label ─────────────────────────────────────────────────────────────────
 jobLabel:
   - playwright-102
   - typescript
