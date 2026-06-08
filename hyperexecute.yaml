@@ -5,7 +5,6 @@
 # Strategy : Matrix (win + linux) with autosplit
 # Dashboard: https://hyperexecute.lambdatest.com/hyperexecute
 # ─────────────────────────────────────────────────────────────────────────────
-
 version: 0.1
 globalTimeout: 90
 testSuiteTimeout: 90
