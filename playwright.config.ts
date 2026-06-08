@@ -3,43 +3,65 @@ import * as dotenv from "dotenv";
 
 dotenv.config();
 
-/**
- * Playwright configuration for HyperExecute.
- * This file is now simplified to let HyperExecute manage everything.
- */
+const user = process.env.LT_USERNAME;
+const accessKey = process.env.LT_ACCESS_KEY;
+
+if (!user || !accessKey) {
+  throw new Error("ERROR: LambdaTest Credentials missing!");
+}
+
+// Helper function to bridge the test to the Web Automation Dashboard
+const getWsEndpoint = (browserName: string, testName: string) => {
+  const capabilities = {
+    "browserName": browserName,
+    "browserVersion": "latest",
+    "LT:Options": {
+      // CRITICAL FIX: The Grid requires exact OS strings. 
+      // Passing "win" or "linux" causes the infinite queue deadlock.
+      "platform": "Windows 10", 
+      "build": "Playwright 101 Assignment", // Generates the Build on the Dashboard!
+      "name": testName, 
+      "user": user,
+      "accessKey": accessKey,
+      "video": true,
+      "network": true,
+      "console": true,
+      "visual": true,
+      "tunnel": false,
+    },
+  };
+  return `wss://cdp.lambdatest.com/playwright?capabilities=${encodeURIComponent(JSON.stringify(capabilities))}`;
+};
+
 export default defineConfig({
   testDir: './tests',
-  timeout: 180_000,          // per-test timeout
+  timeout: 180_000,          
   expect: { timeout: 15_000 },
   fullyParallel: true,     
   retries: 1,               
-  workers: 3, // Playwright will manage workers inside the HyperExecute machine.
-              
+  workers: 3,               
   reporter: [
     ['list'],
-    // This generates the XML file that the HyperExecute 'reports' block needs.
-    ['junit', { outputFile: 'playwright-report/results.xml' }],
     ['html', { outputFolder: 'playwright-report', open: 'never' }],
+    ['junit', { outputFile: 'playwright-report/results.xml' }],
   ],
   use: {
     headless: true,
     viewport: { width: 1280, height: 720 },
-    // Capture artifacts for the HyperExecute dashboard.
     screenshot: 'on',
     video: 'on',
     trace: 'on',
-    // Use the correct, live URL.
-    baseURL: 'https://www.lambdatest.com/selenium-playground/',
+    baseURL: process.env.BASE_URL ?? 'https://www.lambdatest.com/selenium-playground/',
     
-    // --- THIS IS THE FIX ---
-    // We are REMOVING the 'connectOptions' block entirely.
-    // This tells Playwright to use the local browser inside the HyperExecute VM,
-    // which breaks the deadlock.
+    // Connects Playwright to the Web Automation Grid to generate the dashboard build
+    connectOptions: {
+      wsEndpoint: getWsEndpoint('Chrome', 'HyperExecute Playwright Execution')
+    }
   },
   projects: [
     {
       name: 'chromium',
-      testMatch: /.*testmu.*\.spec\.ts/, 
+      testMatch: '**/*testmu*.spec.ts', 
       use: { ...devices['Desktop Chrome'] },
     },
   ],
