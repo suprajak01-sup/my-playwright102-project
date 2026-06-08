@@ -47,10 +47,17 @@ post:
 # --- THE GUARANTEED FIX ---
 # This combination is the key. 'autosplit' asks Playwright for its test list,
 # and 'reports' tells HyperExecute where the final XML will be.
+
+# 1. Tell HyperExecute to use its native Playwright adapter to find tests.
 testDiscovery:
   type: playwright
   mode: dynamic
 
+# 2. Tell HyperExecute how to run EACH test it finds.
+# The '$test' variable is automatically injected by HyperExecute.
+testRunnerCommand: npx playwright test $test --project=chromium
+
+# 3. Tell HyperExecute where to find the generated test report to populate the UI.
 reports:
   - type: junit
     path:
