@@ -7,8 +7,8 @@ const BASE_URL     = 'https://www.testmuai.com/selenium-playground/';
 
 // ─── Page load helper ─────────────────────────────────────────────────────────
 async function waitForPage(page: Page): Promise<void> {
-  await page.waitForLoadState('domcontentloaded', { timeout: 60_000 });
-  await page.waitForLoadState('load',             { timeout: 60_000 });
+  // await page.waitForLoadState('domcontentloaded', { timeout: 60_000 });
+  // await page.waitForLoadState('load',             { timeout: 60_000 });
   try {
     await page.waitForLoadState('networkidle', { timeout: 10_000 });
   } catch { /* safe to ignore in headless CI */ }

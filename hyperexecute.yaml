@@ -9,7 +9,7 @@ autosplit: true
 retryOnFailure: true
 maxRetries: 1
 concurrency: 2
-parallelism: 2
+parallelism: 1
 
 matrix:
   os: [win, linux]
