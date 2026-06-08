@@ -32,8 +32,7 @@ cacheDirectories:
   - node_modules
 
 post:
-  - node -e "console.log('Tests finished on platform:', process.platform)"
-  - node -e "console.log('Artifacts collected from playwright-report/ and test-results/')"
+  - node post.js
 
 # discover.js uses no arrow functions or special chars — safe on win & linux
 testDiscovery:
