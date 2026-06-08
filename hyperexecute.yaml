@@ -4,6 +4,10 @@ globalTimeout: 90
 testSuiteTimeout: 90
 testSuiteStep: 90
 
+# Assign a name to the build. This will group your job under this name
+# on the main 'https://automation.lambdatest.com/build' dashboard.
+buildName: "My Playwright HyperExecute Build"
+
 runson: ${matrix.os}
 autosplit: true
 retryOnFailure: true

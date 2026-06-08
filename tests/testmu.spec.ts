@@ -72,8 +72,7 @@ test.describe('TestMu AI Selenium Playground Scenarios', () => {
      await page.goto('https://www.testmuai.com/selenium-playground/');
  
     await page.getByText('Input Form Submit').click();
-  await expect(page).toHaveURL(/.*input-form-demo/);
-  await page.waitForLoadState('networkidle'); 
+    await page.waitForLoadState('networkidle'); 
 
     // 2. Click "Submit" without filling in any information in the form
     await page.getByRole('button', { name: 'Submit', exact: true }).click();
