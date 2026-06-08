@@ -1,138 +1,140 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 
-test.describe('TestMu AI Selenium Playground Scenarios', () => {
+const PROJECT_NAME = process.env.PROJECT_NAME ?? 'Playwright-TestMu-Demo';
+const NODE_ENV     = process.env.NODE_ENV     ?? 'testing';
+const BASE_URL     = 'https://www.testmuai.com/selenium-playground/';
 
-test('Simple Form Demo validation', async ({ page }) => {
-  // 1. Open the Selenium Playground
-  await page.goto('https://www.lambdatest.com/selenium-playground/', { waitUntil: 'domcontentloaded' });
+// ─── Page load helper ─────────────────────────────────────────────────────────
+async function waitForPage(page: Page): Promise<void> {
+  await page.waitForLoadState('domcontentloaded', { timeout: 60_000 });
+  await page.waitForLoadState('load',             { timeout: 60_000 });
+  try {
+    await page.waitForLoadState('networkidle', { timeout: 10_000 });
+  } catch { /* safe to ignore in headless CI */ }
+}
 
-  // 2. Click “Simple Form Demo”
-  await page.getByText("Simple Form Demo").click();
-  await expect(page).toHaveURL(/.*simple-form-demo/);
-  await page.waitForLoadState('networkidle'); 
+// ─── Navigation helper ────────────────────────────────────────────────────────
+// Clicks a link AND waits for navigation to complete before returning.
+// Required in headless CI where click + immediate URL check can race.
+async function clickAndNavigate(page: Page, href: string): Promise<void> {
+  await Promise.all([
+    page.waitForURL(`**${href}**`, { timeout: 30_000 }),
+    page.locator(`a[href*="${href}"]`).click(),
+  ]);
+  await waitForPage(page);
+}
 
-  const message = "Welcome to TestMu AI";
+// ─── Tests ────────────────────────────────────────────────────────────────────
+test.describe(`TestMu AI Selenium Playground [${PROJECT_NAME} | ${NODE_ENV}]`, () => {
 
-  // 3. Locate the input field
-  const messageInput = page.locator('input#user-message');
-  await messageInput.waitFor({ state: 'visible' }); 
+  // ── Scenario 1: Simple Form Demo ──────────────────────────────────────────
+  test('Scenario 1: Simple Form Demo', async ({ page }) => {
+    // 1. Open Selenium Playground
+    await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' });
+    await waitForPage(page);
 
-  // 4. BRUTE FORCE: Force the value into the input box and trigger the 'input' event
-  await messageInput.evaluate((el: HTMLInputElement, val) => {
-    el.value = val;
-    el.dispatchEvent(new Event('input', { bubbles: true }));
-    el.dispatchEvent(new Event('change', { bubbles: true }));
-  }, message);
+    // 2. Click "Simple Form Demo" and wait for navigation
+    await clickAndNavigate(page, 'simple-form-demo');
 
-   await expect(messageInput).toHaveValue(message);
-  // 5. Small pause to let the site register the forced value
-  await page.waitForTimeout(5000);
+    // 3. Validate URL contains "simple-form-demo"
+    await expect(page).toHaveURL(/simple-form-demo/);
 
-  // 6. Click the button
-  const showMessageButton = page.locator('button#showInput');
-  await showMessageButton.click();
+    // 4. String variable
+    const message = 'Welcome to TestMu AI';
 
-  // 7. Validate the output text
-  const messageOutput = page.locator('p#message');
-  await expect(messageOutput).toHaveText(message);
-});
+    // 5. Fill "Enter Message" text box
+    const messageInput = page.locator("input[placeholder='Please enter your Message']");
+    await messageInput.waitFor({ state: 'visible', timeout: 30_000 });
+    await messageInput.fill(message);
 
- test('Drag and Drop Slider validation with fine-tuning', async ({ page }) => {
-  // 1. Open the Selenium Playground
-  await page.goto('https://www.lambdatest.com/selenium-playground/', { waitUntil: 'domcontentloaded' });
+    // 6. Click "Get Checked Value"
+    await page.locator("button:has-text('Get Checked Value')").click();
 
-  // 2. Click “Drag & Drop Sliders”
-  await page.getByText('Drag & Drop Sliders').click();
-  await expect(page).toHaveURL(/.*drag-drop-range-sliders-demo/);
-  await page.waitForLoadState('networkidle'); 
+    // 7. Validate message shown under "Your Message:"
+    await expect(page.locator('#message')).toHaveText(message, { timeout: 15_000 });
+  });
 
-  // 3. Locate the slider and the output field
-  const sliderContainer = page.locator('.sp__range-success');
-  const slider = sliderContainer.locator('input[type="range"]');
-  const output = sliderContainer.locator('output#rangeSuccess');
+  // ── Scenario 2: Drag & Drop Sliders ───────────────────────────────────────
+  test('Scenario 2: Drag and Drop Slider validation with fine-tuning', async ({ page }) => {
+    // 1. Open Selenium Playground
+    await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' });
+    await waitForPage(page);
 
-  // 4. Get the slider's physical dimensions
-  const sliderBox = await slider.boundingBox();
-  if (sliderBox) {
-    const centerY = sliderBox.y + sliderBox.height / 2;
-    // Estimated starting point at 15%
-    let currentX = sliderBox.x + (sliderBox.width * 0.15);
-    // Estimated target point at 95%
-    let targetX = sliderBox.x + (sliderBox.width * 0.95);
+    // 2. Click "Drag & Drop Sliders" and wait for navigation
+    await clickAndNavigate(page, 'drag-drop-range-sliders-demo');
 
-    // Initial Drag
-    await page.mouse.move(currentX, centerY);
-    await page.mouse.down();
-    await page.mouse.move(targetX, centerY, { steps: 10 });
+    // 3. Validate URL
+    await expect(page).toHaveURL(/drag-drop-range-sliders-demo/);
 
-   //Loop to move
-    // If it's not 95, move 1 pixel at a time until it is exactly 95
-    for (let i = 0; i < 20; i++) { // Max 20 adjustments to avoid infinite loops
-      const currentVal = parseInt(await output.textContent() || '0');
-      if (currentVal === 95) break;
+    // 4. Target "Default value 15" slider — confirmed attribute selector
+    const slider = page.locator('input[value="15"]');
+    await slider.waitFor({ state: 'visible', timeout: 30_000 });
 
-      if (currentVal > 95) {
-        targetX -= 1; // Move left if too high
-      } else {
-        targetX += 1; // Move right if too low
-      }
-      await page.mouse.move(targetX, centerY);
+    // 5. Click slider to focus it
+    await slider.click();
+
+    // 6. Read the adjacent output element
+    const output = page.locator('input[value="15"] + output');
+
+    // 7. Press ArrowRight in a loop until output shows 95
+    //    Loop-based keyboard is the only reliable headless drag approach
+    for (let i = 0; i < 200; i++) {
+      const current = (await output.innerText()).trim();
+      if (current === '95') break;
+      await page.keyboard.press('ArrowRight');
     }
-    await page.mouse.up();
-  }
 
-  // 6. Validate the final value is 95
-  await expect(output).toHaveText('95');
-});
+    // 8. Validate range value shows 95
+    await expect(output).toHaveText('95', { timeout: 10_000 });
+  });
 
-test('Input Form Submit validation', async ({ page }) => {
-  // 1. Open the Selenium Playground
-  await page.goto('https://www.lambdatest.com/selenium-playground/', { waitUntil: 'domcontentloaded' });
+  // ── Scenario 3: Input Form Submit ─────────────────────────────────────────
+  test('Scenario 3: Input Form Submit validation', async ({ page }) => {
+    // 1. Open Selenium Playground
+    await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' });
+    await waitForPage(page);
 
-  // 2. Click “Input Form Submit”
-  await page.getByText('Input Form Submit').click();
-  await expect(page).toHaveURL(/.*input-form-demo/);
-  await page.waitForLoadState('networkidle'); 
+    // 2. Click "Input Form Submit" and wait for navigation
+    await clickAndNavigate(page, 'input-form-demo');
 
-  // Using getByRole 
-  const submitButton = page.getByRole('button', { name: 'Submit' });
-  
-  // 3. Click “Submit” without filling in any information
-  await submitButton.click();
+    // 3. Validate URL
+    await expect(page).toHaveURL(/input-form-demo/);
 
-  // 4. Assert “Please fill in the fields” error message
-  const nameInput = page.locator('#name');
-  const validationMessage = await nameInput.evaluate((element: HTMLInputElement) => element.validationMessage);
-  
-  // We check for "fill" to ensure it works across Chromium, Firefox, and WebKit.
-  expect(validationMessage).toContain('fill');
+    // Wait for form to be ready
+    const nameInput = page.locator('#name');
+    await nameInput.waitFor({ state: 'visible', timeout: 30_000 });
 
-  
-  // Using locator() with IDs 
-  await nameInput.fill('Kandikanti Supraja');
-  await page.locator('#company').fill('Deloitte');
-  await page.locator('#websitename').fill('https://www.deloitte.com');
-  
- 
- await page.locator('input[id="inputEmail4"]').fill('john.doe@example.com');
+    // 4. Click Submit with empty form
+    await page.locator("button:has-text('Submit')").click();
 
-    await page.locator('input[id="inputPassword4"]').fill('SecurePassword123');
-    await page.locator('input[id="company"]').fill('Deloitte');
-    await page.locator('input[id="websitename"]').fill('https://www.deloitte.com');
-    await page.locator('input[id="inputCity"]').fill('San Francisco');
-    await page.locator('input[id="inputAddress1"]').fill('123 Testing St');
-    await page.locator('input[id="inputAddress2"]').fill('Suite 500');
-    await page.locator('input[id="inputState"]').fill('California');
-    await page.locator('input[id="inputZip"]').fill('94103');
-    
-  // 5. Select “United States” from the Country drop-down using text property
-  await page.selectOption('select[name="country"]', { label: 'United States' });
+    // 5. Assert browser native validation — "Please fill in this field."
+    const validationMsg = await nameInput.evaluate(
+      (el: HTMLInputElement) => el.validationMessage
+    );
+    expect(validationMsg).toContain('fill');
 
-  // 6. Click “Submit” again now that the form is full
-  await submitButton.click();
+    // 6. Fill all fields
+    await nameInput.fill('John Doe');
+    await page.locator('#inputEmail4').fill('john.doe@example.com');
+    await page.locator('#inputPassword4').fill(process.env.API_PASSWORD ?? 'SecurePassword123');
+    await page.locator('#company').fill('Deloitte');
+    await page.locator('#websitename').fill('https://www.deloitte.com');
+    await page.locator('#inputCity').fill('San Francisco');
+    await page.locator('#inputAddress1').fill('123 Testing St');
+    await page.locator('#inputAddress2').fill('Suite 500');
+    await page.locator('#inputState').fill('California');
+    await page.locator('#inputZip').fill('94103');
 
-  // 7. Validate the success message
-  const successMessage = page.locator('.success-msg');
-  await expect(successMessage).toHaveText('Thanks for contacting us, we will get back to you shortly.');
-});
+    // 7. Select "United States" from Country drop-down using text property
+    await page.selectOption('select[name="country"]', { label: 'United States' });
+
+    // 8. Submit completed form
+    await page.locator("button:has-text('Submit')").click();
+
+    // 9. Validate success message
+    await expect(page.locator('p.success-msg')).toHaveText(
+      'Thanks for contacting us, we will get back to you shortly.',
+      { timeout: 15_000 }
+    );
+  });
 });
