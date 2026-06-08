@@ -6,7 +6,7 @@ testSuiteStep: 90
 
 # Matrix configuration to run tests across 2 different OS combinations
 runson: ${matrix.os}
-autosplit: true
+autosplit: false # Turn autosplit off as we are defining the test suite manually
 retryOnFailure: true
 maxRetries: 1
 
@@ -22,41 +22,33 @@ env:
   NODE_ENV: testing
   PROJECT_NAME: "Playwright-TestMu-Demo"
 
-# Secret Management: Showcase injecting a hidden API key or Password
-# The actual value is stored in the HyperExecute Dashboard Secrets manager
+# Secret Management: The actual value is stored in the HyperExecute Dashboard
 secrets:
   MY_SECRET_TOKEN:
   API_PASSWORD:
 
 # Pre Steps and Dependency Caching
-# These steps run before the tests start
 pre:
   - npm install
   - npx playwright install chromium --with-deps
 
-# Dependency Caching: Ensure node_modules are cached across runs
+# Dependency Caching
 cacheKey: '{{ checksum "package-lock.json" }}'
 cacheDirectories:
   - node_modules
 
 # Post Steps
-# These run after the tests have finished (useful for cleanups)
 post:
   - echo "Test execution completed on ${matrix.os}"
   - echo "Cleaning up temporary files..."
 
-# 100% Cross-Platform Test Discovery
-# 'echo' is natively supported on both Windows and Linux, bypassing OS-specific shell conflicts.
-testDiscovery:
-  type: raw
-  mode: dynamic
-  command: echo tests/testmu.spec.ts
-
-# Command to execute tests based on the file discovered above
-testRunnerCommand: npx playwright test $test --project=chromium
+# --- THIS IS THE FINAL FIX ---
+# Define the test suite directly. This is the most robust, cross-platform method.
+# It completely avoids shell command differences between Windows and Linux.
+testSuites:
+  - npx playwright test tests/testmu.spec.ts --project=chromium
 
 # Artifacts Management
-# Gathers Playwright reports/videos and collates them into a single downloadable zip on the dashboard
 mergeArtifacts: true
 uploadArtefacts:
   - name: Playwright-Test-Reports

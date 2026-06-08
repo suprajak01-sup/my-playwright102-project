@@ -9,7 +9,7 @@ test('Simple Form Demo validation', async ({ page }) => {
   // 2. Click “Simple Form Demo”
   await page.getByText("Simple Form Demo").click();
   await expect(page).toHaveURL(/.*simple-form-demo/);
-  await page.waitForLoadState('domcontentloaded'); 
+  await page.waitForLoadState('networkidle'); 
 
   const message = "Welcome to TestMu AI";
 
@@ -44,7 +44,7 @@ test('Simple Form Demo validation', async ({ page }) => {
   // 2. Click “Drag & Drop Sliders”
   await page.getByText('Drag & Drop Sliders').click();
   await expect(page).toHaveURL(/.*drag-drop-range-sliders-demo/);
-  await page.waitForLoadState('domcontentloaded'); 
+  await page.waitForLoadState('networkidle'); 
 
   // 3. Locate the slider and the output field
   const sliderContainer = page.locator('.sp__range-success');
@@ -114,15 +114,17 @@ test('Input Form Submit validation', async ({ page }) => {
   await page.locator('#websitename').fill('https://www.deloitte.com');
   
  
-  // Using getByPlaceholder
-  await page.getByPlaceholder('Email').fill('supraja@example.com');
-  await page.getByPlaceholder('Password').fill('Password123');
-  await page.getByPlaceholder('City').fill('Hyderabad');
-  await page.getByPlaceholder('Address 1').fill('Hi-Tech City');
-  await page.getByPlaceholder('Address 2').fill('Phase 2');
-  await page.getByPlaceholder('State').fill('Telangana');
-  await page.getByPlaceholder('Zip code').fill('500081');
+ await page.locator('input[id="inputEmail4"]').fill('john.doe@example.com');
 
+    await page.locator('input[id="inputPassword4"]').fill('SecurePassword123');
+    await page.locator('input[id="company"]').fill('Deloitte');
+    await page.locator('input[id="websitename"]').fill('https://www.deloitte.com');
+    await page.locator('input[id="inputCity"]').fill('San Francisco');
+    await page.locator('input[id="inputAddress1"]').fill('123 Testing St');
+    await page.locator('input[id="inputAddress2"]').fill('Suite 500');
+    await page.locator('input[id="inputState"]').fill('California');
+    await page.locator('input[id="inputZip"]').fill('94103');
+    
   // 5. Select “United States” from the Country drop-down using text property
   await page.selectOption('select[name="country"]', { label: 'United States' });
 
