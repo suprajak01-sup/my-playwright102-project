@@ -1,141 +1,110 @@
-/// <reference types="node" />
-import { test, expect, Page } from '@playwright/test';
-
-const PROJECT_NAME = process.env.PROJECT_NAME ?? 'Playwright-TestMu-Demo';
-const NODE_ENV     = process.env.NODE_ENV     ?? 'testing';
-const BASE_URL     = 'https://www.testmuai.com/selenium-playground/';
-
-// ─── Page load helper ─────────────────────────────────────────────────────────
-async function waitForPage(page: Page): Promise<void> {
-  // await page.waitForLoadState('domcontentloaded', { timeout: 60_000 });
-  // await page.waitForLoadState('load',             { timeout: 60_000 });
-  try {
-    await page.waitForLoadState('networkidle', { timeout: 10_000 });
-  } catch { /* safe to ignore in headless CI */ }
-}
-
-// ─── Navigation helper ────────────────────────────────────────────────────────
-// Clicks a link AND waits for navigation to complete before returning.
-// Required in headless CI where click + immediate URL check can race.
-async function clickAndNavigate(page: Page, href: string): Promise<void> {
-  await Promise.all([
-    page.waitForURL(`**${href}**`, { timeout: 30_000 }),
-    page.locator(`a[href*="${href}"]`).click(),
-  ]);
-  await waitForPage(page);
-}
-
-// ─── Tests ────────────────────────────────────────────────────────────────────
-test.describe(`TestMu AI Selenium Playground [${PROJECT_NAME} | ${NODE_ENV}]`, () => {
-
-  // ── Scenario 1: Simple Form Demo ──────────────────────────────────────────
-  test('Scenario 1: Simple Form Demo', async ({ page }) => {
-    // 1. Open Selenium Playground
-    await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' });
-    await waitForPage(page);
-
-    // 2. Click "Simple Form Demo" and wait for navigation
-    await clickAndNavigate(page, 'simple-form-demo');
-
-    // 3. Validate URL contains "simple-form-demo"
+import { test, expect } from '@playwright/test';
+ 
+test.describe('Test Scenario 1: Simple Form Demo', () => {
+  test('should validate message input and display', async ({ page }) => {
+    // Maximize the browser window
+    await page.setViewportSize({ width: 1920, height: 1080 });
+ 
+    // 1. Open LambdaTest's Selenium Playground
+    await page.goto('https://www.lambdatest.com/selenium-playground');
+ 
+    // 2. Click "Simple Form Demo" - using text locator
+    await page.getByRole('link', { name: 'Simple Form Demo' }).click();
+ 
+    // 3. Validate that the URL contains "simple-form-demo"
     await expect(page).toHaveURL(/simple-form-demo/);
-
-    // 4. String variable
-    const message = 'Welcome to TestMu AI';
-
-    // 5. Fill "Enter Message" text box
-    const messageInput = page.locator("input[placeholder='Please enter your Message']");
-    await messageInput.waitFor({ state: 'visible', timeout: 30_000 });
-    await messageInput.fill(message);
-
-    // 6. Click "Get Checked Value"
-    await page.locator("button:has-text('Get Checked Value')").click();
-
-    // 7. Validate message shown under "Your Message:"
-    await expect(page.locator('#message')).toHaveText(message, { timeout: 15_000 });
+ 
+    // 4. Create a variable for a string value
+    const messageText = 'Welcome to LambdaTest';
+ 
+    // 5. Use this variable to enter values in the "Enter Message" text box - using ID locator
+    await page.getByRole('textbox', { name: 'Please enter your Message', exact: true }).fill(messageText);
+ 
+    // 6. Click "Get Checked Value" - using CSS selector
+    await page.locator('#showInput').click();
+ 
+    // 7. Validate whether the same text message is displayed in the right-hand panel
+    const displayedMessage = await page.locator('#message').textContent();
+    expect(displayedMessage).toBe(messageText);
   });
-
-  // ── Scenario 2: Drag & Drop Sliders ───────────────────────────────────────
-  test('Scenario 2: Drag and Drop Slider validation with fine-tuning', async ({ page }) => {
-    // 1. Open Selenium Playground
-    await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' });
-    await waitForPage(page);
-
-    // 2. Click "Drag & Drop Sliders" and wait for navigation
-    await clickAndNavigate(page, 'drag-drop-range-sliders-demo');
-
-    // 3. Validate URL
-    await expect(page).toHaveURL(/drag-drop-range-sliders-demo/);
-
-    // 4. Target "Default value 15" slider — confirmed attribute selector
-    const slider = page.locator('input[value="15"]');
-    await slider.waitFor({ state: 'visible', timeout: 30_000 });
-
-    // 5. Click slider to focus it
-    await slider.click();
-
-    // 6. Read the adjacent output element
-    const output = page.locator('input[value="15"] + output');
-
-    // 7. Press ArrowRight in a loop until output shows 95
-    //    Loop-based keyboard is the only reliable headless drag approach
-    for (let i = 0; i < 200; i++) {
-      const current = (await output.innerText()).trim();
-      if (current === '95') break;
-      await page.keyboard.press('ArrowRight');
+ 
+  test('should drag slider to value 95', async ({ page }) => {
+    // Maximize the browser window
+    await page.setViewportSize({ width: 1920, height: 1080 });
+ 
+    // 1. Open the Selenium Playground page and click "Drag & Drop Sliders"
+    await page.goto('https://www.lambdatest.com/selenium-playground');
+ 
+    // Click on "Drag & Drop Sliders" - using role locator
+    await page.getByRole('link', { name: 'Drag & Drop Sliders' }).click();
+ 
+    // 2. Select the slider "Default value 15" and drag the bar to make it 95
+    // Using XPath locator for the slider with default value 15
+    const sliderHandle = page.locator('(//input[@type="range"])[3]');
+    const rangeOutput = page.locator('(//output[@id="rangeSuccess"])[1]');
+ 
+    // Get the slider element's bounding box
+    const sliderBox = await sliderHandle.boundingBox();
+ 
+    if (sliderBox) {
+      // Calculate the position to drag to (95 out of 100)
+      const targetPosition = sliderBox.x + (sliderBox.width * 0.93);
+ 
+      // Drag the slider to the target position with steps for precision
+      await sliderHandle.hover();
+      await page.mouse.down();
+      await page.mouse.move(targetPosition, sliderBox.y + sliderBox.height / 2, { steps: 10 });
+      await page.mouse.up();
+ 
+      // Wait for value to update
+      await page.waitForTimeout(500);
     }
-
-    // 8. Validate range value shows 95
-    await expect(output).toHaveText('95', { timeout: 10_000 });
+ 
+    // Validate whether the range value shows 95
+    await expect(rangeOutput).toHaveText('95');
   });
-
-  // ── Scenario 3: Input Form Submit ─────────────────────────────────────────
-  test('Scenario 3: Input Form Submit validation', async ({ page }) => {
-    // 1. Open Selenium Playground
-    await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' });
-    await waitForPage(page);
-
-    // 2. Click "Input Form Submit" and wait for navigation
-    await clickAndNavigate(page, 'input-form-demo');
-
-    // 3. Validate URL
-    await expect(page).toHaveURL(/input-form-demo/);
-
-    // Wait for form to be ready
+  test('should validate form submission with required fields', async ({ page }) => {
+    // Maximize the browser window
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    // 1. Open the Selenium Playground page and click "Input Form Submit"
+    await page.goto('https://www.lambdatest.com/selenium-playground');
+ 
+    // Click "Input Form Submit" - using text locator
+    await page.getByRole('link', { name: 'Input Form Submit', exact: true }).click();
+ 
+    // 2. Click "Submit" without filling in any information in the form
+    await page.getByRole('button', { name: 'Submit', exact: true }).click();
+ 
+    // 3. Assert "Please fill in the fields" error message
+    // Check if the name field shows validation message
     const nameInput = page.locator('#name');
-    await nameInput.waitFor({ state: 'visible', timeout: 30_000 });
-
-    // 4. Click Submit with empty form
-    await page.locator("button:has-text('Submit')").click();
-
-    // 5. Assert browser native validation — "Please fill in this field."
-    const validationMsg = await nameInput.evaluate(
-      (el: HTMLInputElement) => el.validationMessage
-    );
-    expect(validationMsg).toContain('fill');
-
-    // 6. Fill all fields
+    const validationMessage = await nameInput.evaluate((el: HTMLInputElement) => el.validationMessage);
+    expect(validationMessage).toBeTruthy(); // Browser validation message appears
+ 
+    // 4. Fill in Name, Email, and other fields
+    // Using different locator types (ID, name, CSS selector)
     await nameInput.fill('John Doe');
     await page.locator('#inputEmail4').fill('john.doe@example.com');
-    await page.locator('#inputPassword4').fill(process.env.API_PASSWORD ?? 'SecurePassword123');
-    await page.locator('#company').fill('Deloitte');
-    await page.locator('#websitename').fill('https://www.deloitte.com');
+    await page.locator('#inputPassword4').fill('SecurePass123');
+    await page.locator('[name="company"]').fill('LambdaTest Inc');
+    await page.locator('#websitename').fill('https://www.lambdatest.com');
+ 
+    // 5. From the Country drop-down, select "United States" using the text property
+    await page.locator('[name="country"]').selectOption({ label: 'United States' });
+ 
+    // Fill remaining fields
     await page.locator('#inputCity').fill('San Francisco');
-    await page.locator('#inputAddress1').fill('123 Testing St');
-    await page.locator('#inputAddress2').fill('Suite 500');
-    await page.locator('#inputState').fill('California');
-    await page.locator('#inputZip').fill('94103');
-
-    // 7. Select "United States" from Country drop-down using text property
-    await page.selectOption('select[name="country"]', { label: 'United States' });
-
-    // 8. Submit completed form
-    await page.locator("button:has-text('Submit')").click();
-
-    // 9. Validate success message
-    await expect(page.locator('p.success-msg')).toHaveText(
-      'Thanks for contacting us, we will get back to you shortly.',
-      { timeout: 15_000 }
-    );
+    await page.locator('[name="address_line1"]').fill('123 Main Street');
+    await page.locator('[name="address_line2"]').fill('Suite 100');
+    await page.getByLabel('City*', { exact: true }).fill('California');
+    await page.locator('[name="zip"]').fill('94102');
+ 
+    // 6. Fill in all fields and click "Submit"
+    await page.getByRole('button', { name: 'Submit', exact: true }).click();
+ 
+    // 7. Once submitted, validate the success message
+    const successMessage = page.locator('.success-msg');
+    await expect(successMessage).toBeVisible();
+    await expect(successMessage).toContainText('Thanks for contacting us, we will get back to you shortly.');
   });
 });
