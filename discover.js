@@ -1,8 +1,9 @@
-// Returns each test by name pattern so autosplit distributes them across tasks.
-// This gives HyperExecute 3 work items — enough to fill all tasks on win & linux.
-var tests = [
-  'tests/testmu.spec.ts --grep "Scenario 1"',
-  'tests/testmu.spec.ts --grep "Scenario 2"',
-  'tests/testmu.spec.ts --grep "Scenario 3"'
-];
-console.log(tests.join('\n'));
+const fs = require('fs');
+const path = require('path');
+
+const testDir = 'tests';
+const files = fs.readdirSync(testDir)
+  .filter(function(f) { return f.endsWith('.spec.ts'); })
+  .map(function(f) { return testDir + '/' + f; });
+
+console.log(files.join('\n'));

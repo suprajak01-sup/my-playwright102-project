@@ -1,5 +1,35 @@
 import { defineConfig, devices } from '@playwright/test';
+import * as dotenv from "dotenv";
 
+dotenv.config();
+
+const user = process.env.LT_USERNAME;
+const accessKey = process.env.LT_ACCESS_KEY;
+
+if (!user || !accessKey) {
+  throw new Error("ERROR: LambdaTest Credentials missing!");
+}
+
+// Helper function takes the browser, OS, and the EXACT test name you want on the dashboard
+const getWsEndpoint = (browserName: string, os: string, testName: string) => {
+  const capabilities = {
+    "browserName": browserName,
+    "browserVersion": "latest",
+    "LT:Options": {
+      "platform": os,
+      "build": "Playwright 101 Assignment",
+      "name": testName, // Passes the Scenario name to the dashboard!
+      "user": user,
+      "accessKey": accessKey,
+      "video": true,
+      "network": true,
+      "console": true,
+      "visual": true,
+      "tunnel": false,
+    },
+  };
+  return `wss://cdp.lambdatest.com/playwright?capabilities=${encodeURIComponent(JSON.stringify(capabilities))}`;
+};
 /**
  * Playwright configuration for HyperExecute.
  *
